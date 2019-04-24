@@ -62,6 +62,10 @@ namespace API.Controllers
             return items.Update(id, model);
         }
 
-
+        [HttpGet("Delete/{id}")]
+        public ActionResult<bool> Delete(int id)
+        {
+            return items.Delete(id);
+        }
     }
 }

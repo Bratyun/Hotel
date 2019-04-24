@@ -1,62 +1,41 @@
-﻿using DAL.Account;
-using DAL.EntityClasses;
-using DAL.Models;
-using Hotel.DAL;
+﻿using API.DAL;
+using Contract.DAL;
+using Contract.Models;
 using Hotel.Models;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
-using NLog;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using System.Threading.Tasks;
+using Web.Models;
 
 namespace Hotel.Controllers
 {
     [Authorize]
     public class RequestController : Controller
     {
-        private Logger Logger { get; set; } = LogManager.GetCurrentClassLogger();
+        public RequestProxy RequestService =>
+            new RequestProxy(HttpContext?.Session.GetString(SessionKeys.Token));
 
-        private IAuthenticationManager AuthenticationManager
-        {
-            get
-            {
-                return HttpContext.GetOwinContext().Authentication;
-            }
-        }
+        public UsersProxy UserService =>
+            new UsersProxy(HttpContext?.Session.GetString(SessionKeys.Token));
 
-        private ApplicationUserManager UserManager
-        {
-            get
-            {
-                return HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            }
-        }
+        public RoomProxy RoomService =>
+            new RoomProxy(HttpContext?.Session.GetString(SessionKeys.Token));
 
-        private ApplicationRoleManager RoleManager
+        public async Task<ActionResult> List()
         {
-            get
-            {
-                return HttpContext.GetOwinContext().GetUserManager<ApplicationRoleManager>();
-            }
-        }
-
-        public ActionResult List()
-        {
-            Logger.Debug("Request to take all list of Requests");
-            List<Request> requests = new List<Request>();
+            IEnumerable<Request> requests;
             if (User.IsInRole("Admin"))
             {
-                requests = RequestAccess.GetRequestsForAdmin();
+                requests = await GetRequestsForAdmin();
             }
             else
             {
-                requests = RequestAccess.GetRequestsByUserName(User.Identity.Name, UserManager);
+                requests = await GetByUser(User.Identity.Name);
             }
-            Logger.Debug("Response of taking all list of Requests");
-            return View(RequestAccess.RequestsToModels(requests));
+            return View(RequestsToModels(requests));
         }
 
         [HttpGet]
@@ -103,7 +82,6 @@ namespace Hotel.Controllers
         [Authorize(Roles = "Admin, Owner")]
         public ActionResult Answer(int id)
         {
-            Logger.Debug("Request to take all list of Requests and Rooms for Answer");
             int comfort = -1;
             int size = -1;
             Request request = RequestAccess.GetById(id);
@@ -114,7 +92,6 @@ namespace Hotel.Controllers
             }
             List<Room> rooms = RoomAccess.GetRoomByComfortAndSize(comfort, size);
             ViewBag.Rooms = rooms;
-            Logger.Debug("Response of taking all list of Requests and Rooms for Answer");
             return View(request);
         }
 
@@ -122,7 +99,6 @@ namespace Hotel.Controllers
         [Authorize(Roles = "Admin, Owner")]
         public ActionResult Answer(int requestId, int roomId)
         {
-            Logger.Debug("Make supply");
             Room room = RoomAccess.GetById(roomId);
             Request request = RequestAccess.GetById(requestId);
             if (request != null && room != null)
@@ -132,18 +108,12 @@ namespace Hotel.Controllers
                 RequestAccess.Update(request);
                 return RedirectToAction("List");
             }
-            else
-            {
-                Logger.Error("Room or Request not found");
-            }
 
-            Logger.Debug("End of making supply");
             return RedirectToAction("Answer", new { id = requestId });
         }
 
         public ActionResult Response()
         {
-            Logger.Debug("Start making supply for user");
             List<Request> requests = RequestAccess.GetRequestsByUserNameAndStatus(User.Identity.Name, RequestStatus.Waiting);
             List<Room> rooms = new List<Room>();
             foreach (var item in requests)
@@ -154,65 +124,96 @@ namespace Hotel.Controllers
                     rooms.Add(r);
                 }
             }
-            Logger.Debug("Show supply for user");
             return View(rooms);
         }
 
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            Logger.Debug("Start of delete of Request");
-            RequestAccess.Delete(id);
-            Logger.Debug("End of delete of Request");
+            await RequestService.Delete(id);
             return RedirectToAction("List");
         }
 
-        public ActionResult Cancel(int id)
+        public async Task<ActionResult> Cancel(int id)
         {
-            Logger.Debug("Start of refuse from Request");
-            Request request = RequestAccess.GetById(id);
+            Request request = await RequestService.GetById(id);
             if (request != null)
             {
                 request.Answer = 0;
                 request.Status = RequestStatus.Refused;
-                RequestAccess.Update(request);
+                await RequestService.Edit(request.Id, request);
             }
-            Logger.Debug("End of refuse from Request");
             return RedirectToAction("List");
         }
 
-        public ActionResult More(int id)
+        public async Task<ActionResult> More(int id)
         {
-            Logger.Debug("Get more information about recommend room");
-            Request request = RequestAccess.GetById(id);
+            Request request = await RequestService.GetById(id);
             Room room = new Room();
             if (request != null)
             {
-                room = RoomAccess.GetById(request.Answer);
+                room = await RoomService.GetById(request.Answer);
             }
-            else
-            {
-                Logger.Error("Request from user not found");
-            }
-            Logger.Debug("Get more information about recommend room. End");
             return View(room);
         }
 
-        public ActionResult Reserve(int id)
+        public async Task<ActionResult> Reserve(int id)
         {
-            Logger.Debug("Start rdirect to reserve room");
-            Request request = RequestAccess.GetById(id);
+            Request request = await RequestService.GetById(id);
             if (request != null)
             {
                 request.Status = RequestStatus.Executed;
-                RequestAccess.Update(request);
+                await RequestService.Edit(request.Id, request);
                 return RedirectToAction("Reserve", "Room", new { id = request.Answer });
             }
-            else
-            {
-                Logger.Error("Request from user not found");
-            }
-            Logger.Debug("End rdirect to reserve room");
             return RedirectToAction("List");
+        }
+
+        private async Task<IEnumerable<Request>> GetRequestsForAdmin()
+        {
+            IEnumerable<Request> resuests = await RequestService.List();
+            List<Request> results = new List<Request>();
+            foreach (var item in resuests)
+            {
+                if (item.Status == RequestStatus.New || item.Status == RequestStatus.Refused)
+                {
+                    results.Add(item);
+                }
+            }
+            return results;
+        }
+
+        private List<RequestViewModel> RequestsToModels(IEnumerable<Request> requests)
+        {
+            List<RequestViewModel> models = new List<RequestViewModel>();
+            foreach (var item in requests)
+            {
+                models.Add(new RequestViewModel(item));
+            }
+            return models;
+        }
+
+        private async Task<IEnumerable<Request>> GetByUser(string name)
+        {
+            int userId = 0;
+            IEnumerable<User> users = await UserService.GetList();
+            foreach (var item in users)
+            {
+                if (item.Login == name)
+                {
+                    userId = item.Id;
+                    break;
+                }
+            }
+            IEnumerable<Request> resuests = await RequestService.List();
+            List<Request> results = new List<Request>();
+            foreach (var item in resuests)
+            {
+                if (item.UserId == userId)
+                {
+                    results.Add(item);
+                }
+            }
+            return results;
         }
     }
 }

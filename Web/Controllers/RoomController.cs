@@ -21,6 +21,7 @@ namespace Hotel.Controllers
 
         public UsersProxy UserService =>
             new UsersProxy(HttpContext?.Session.GetString(SessionKeys.Token));
+
         public CheckProxy CheckService =>
             new CheckProxy(HttpContext?.Session.GetString(SessionKeys.Token));
         
@@ -41,7 +42,7 @@ namespace Hotel.Controllers
         [HttpPost]
         [Authorize(Roles = "Owner, Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Add(RoomRegisterViewModel model, HttpPostedFileBase uploadImage)
+        public async Task<ActionResult> Add(RoomRegisterViewModel model, IFormFile uploadImage)
         {
             if (ModelState.IsValid && uploadImage != null)
             {
@@ -53,9 +54,9 @@ namespace Hotel.Controllers
                 }
 
                 byte[] imageData = null;
-                using (var binaryReader = new BinaryReader(uploadImage.InputStream))
+                using (var binaryReader = new BinaryReader(uploadImage.OpenReadStream()))
                 {
-                    imageData = binaryReader.ReadBytes(uploadImage.ContentLength);
+                    imageData = binaryReader.ReadBytes((int)uploadImage.Length);
                 }
                 model.Image = imageData;
                 Room room = new Room(model.RoomSize, model.Comfort, model.Image, model.Price, model.Status);
@@ -93,7 +94,7 @@ namespace Hotel.Controllers
         [HttpPost]
         [Authorize(Roles = "Owner, Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(RoomEditViewModel model, HttpPostedFileBase uploadImage)
+        public async Task<ActionResult> Edit(RoomEditViewModel model, IFormFile uploadImage)
         {
             Room room = await RoomService.GetById(model.Id);
             if (room == null)
@@ -116,70 +117,68 @@ namespace Hotel.Controllers
                 }
 
                 byte[] imageData = null;
-                using (var binaryReader = new BinaryReader(uploadImage.InputStream))
+                using (var binaryReader = new BinaryReader(uploadImage.OpenReadStream()))
                 {
-                    imageData = binaryReader.ReadBytes(uploadImage.ContentLength);
+                    imageData = binaryReader.ReadBytes((int)uploadImage.Length);
                 }
                 model.Image = imageData;
             }
 
             if (ModelState.IsValid)
             {
-                if (model.UserId == null && room.UserId != null)
+                if (model.UserId == 0 && room.UserId != 0)
                 {
-                    Check check = CheckAccess.GetByUserAndRoomId(room.UserId, room.Id);
+                    IEnumerable<Check> checks = await CheckService.List();
+                    Check check = null;
+                    foreach (var item in checks)
+                    {
+                        if (item.UserId == room.UserId && item.RoomId == room.Id )
+                        {
+                            check = item;
+                        }
+                    }
                     if (check != null)
                     {
                         check.Status = CheckStatus.Failed;
-                        CheckAccess.Update(check);
+                        await CheckService.Edit(check.Id, check);
                     }
-                    model.User = null;
-                    model.UserId = null;
+                    model.UserId = 0;
                 }
-                else if (model.UserId != null)
+                else if (model.UserId != 0)
                 {
-                    ApplicationUser user = UserManager.FindByIdAsync(model.UserId).Result;
+                    User user = await UserService.Get(model.UserId);
                     if (user == null || user.Id != model.UserId)
                     {
-                        Logger.Debug("User not found");
                         ModelState.AddModelError("UserId", "User not found with same id");
                         return View(model);
                     }
                     else
                     {
-                        Logger.Debug("User found");
                         if (model.UserId != room.UserId)
                         {
-                            Check check = CheckAccess.GetByUserAndRoomId(room.UserId, room.Id);
+                            Check check = await GetRoomByUserAndRoomId(room.UserId, room.Id);
                             if (check != null)
                             {
                                 check.Status = CheckStatus.Failed;
-                                CheckAccess.Update(check);
-                                Check newCheck = new Check(user?.Id, model.Id, model.Price, DateTime.Now, CheckStatus.New);
-                                newCheck = CheckAccess.Add(newCheck);
+                                await CheckService.Edit(check.Id, check);
+                                Check newCheck = new Check(user.Id, model.Id, model.Price, DateTime.UtcNow, CheckStatus.New);
+                                newCheck = await CheckService.Add(newCheck);
                             }
-                            else if (room.UserId == null)
+                            else if (room.UserId == 0)
                             {
-                                Check newCheck = new Check(user?.Id, model.Id, model.Price, DateTime.Now, CheckStatus.New);
-                                newCheck = CheckAccess.Add(newCheck);
+                                Check newCheck = new Check(user.Id, model.Id, model.Price, DateTime.UtcNow, CheckStatus.New);
+                                newCheck = await CheckService.Add(newCheck);
                             }
                         }
-                        model.User = user;
                         model.UserId = user.Id;
                     }
                 }
-
-                Logger.Debug("Model is valid");
-                Room toUpdate = RoomAccess.RoomEditModelToRoom(model);
-                RoomAccess.Update(toUpdate);
-                Logger.Debug("End of updating room");
+                
+                Room toUpdate = await RoomEditModelToRoom(model);
+                await RoomService.Edit(toUpdate.Id, toUpdate);
                 return RedirectToAction("List");
             }
-            else
-            {
-                Logger.Debug("Model is not valid");
-            }
-            Logger.Debug("End of updating room");
+
             return View(model);
         }
 
@@ -245,6 +244,40 @@ namespace Hotel.Controllers
             room.Image = model.Image;
             room.StartDate = model.StartDate;
             room.EndDate = model.EndDate;
+            return room;
+        }
+
+        private async Task<Check> GetRoomByUserAndRoomId(int userId, int roomId)
+        {
+            IEnumerable<Check> checks = await CheckService.List();
+            Check check = null;
+            foreach (var item in checks)
+            {
+                if (item.UserId == userId && item.RoomId == roomId)
+                {
+                    check = item;
+                    break;
+                }
+            }
+            return check;
+        }
+
+        private async Task<Room> RoomEditModelToRoom(RoomEditViewModel model)
+        {
+            Room room = await RoomService.GetById(model.Id);
+            if (room == null)
+            {
+                room = new Room();
+                room.Id = model.Id;
+            }
+            room.RoomSize = model.RoomSize;
+            room.Comfort = model.Comfort;
+            room.Price = model.Price;
+            room.Image = model.Image;
+            room.StartDate = model.StartDate;
+            room.EndDate = model.EndDate;
+            room.UserId = model.UserId;
+            room.Status = model.Status;
             return room;
         }
     }

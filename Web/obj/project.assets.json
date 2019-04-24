@@ -11902,11 +11902,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Hotel\\Web\\Web.csproj",
+      "projectUniqueName": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Git\\Hotel\\Web\\Web.csproj",
       "projectName": "Web",
-      "projectPath": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Hotel\\Web\\Web.csproj",
+      "projectPath": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Git\\Hotel\\Web\\Web.csproj",
       "packagesPath": "C:\\Users\\Bratyun\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Hotel\\Web\\obj\\",
+      "outputPath": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Git\\Hotel\\Web\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -11925,8 +11925,8 @@
       "frameworks": {
         "netcoreapp2.1": {
           "projectReferences": {
-            "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Hotel\\Contract\\Contract.csproj": {
-              "projectPath": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Hotel\\Contract\\Contract.csproj"
+            "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Git\\Hotel\\Contract\\Contract.csproj": {
+              "projectPath": "C:\\Users\\Bratyun\\Desktop\\флешка\\3 курс\\2 семестр\\ААПЗ\\Git\\Hotel\\Contract\\Contract.csproj"
             }
           }
         }

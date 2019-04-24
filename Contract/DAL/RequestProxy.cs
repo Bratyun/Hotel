@@ -87,5 +87,18 @@ namespace Contract.DAL
                 return null;
             }
         }
+
+        public async Task<bool> Delete(int id)
+        {
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync($"delete/{id}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }
