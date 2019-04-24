@@ -1,0 +1,84 @@
+﻿@model IEnumerable<Hotel.Models.RequestViewModel>
+@using DAL.EntityClasses
+
+@{
+    ViewBag.Title = "Requests";
+}
+
+<h2>Requests</h2>
+
+@foreach (var item in Model)
+{
+    if (User.IsInRole("Admin") && item.Status != RequestStatus.New && item.Status != RequestStatus.Refused)
+    {
+        continue;
+    }
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title">
+                @Html.DisplayFor(modelItem => item.Id)
+            </h2>
+        </div>
+        <div class="panel-body">
+            <div>
+                <span class="modal-title">
+                    Size of room: 
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.RoomSize)
+                </strong>
+            </div>
+            <div>
+                <span class="modal-title">
+                    Level of comfort: 
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.Comfort)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    Beginning of the visit: 
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    End of the visit: 
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    Status: 
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </strong>
+            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div>
+                    @Html.ActionLink("Search answer", "Answer", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+                </div>
+            }
+            else if (User.IsInRole("User"))
+            {
+
+                <div>
+                    @Html.ActionLink("Delete request", "Delete", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+                    @if (item.Status == RequestStatus.Waiting)
+                    {
+                        @Html.ActionLink("More about room", "More", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+                        @Html.ActionLink("Reserve", "Reserve", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+                        @Html.ActionLink("Does not fit", "Cancel", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}

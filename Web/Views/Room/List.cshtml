@@ -1,0 +1,131 @@
+﻿@model IEnumerable<DAL.EntityClasses.Room>
+@using DAL.EntityClasses
+
+@{
+    ViewBag.Title = "List";
+}
+
+<h2>Rooms</h2>
+
+@if (User.IsInRole("Admin") || User.IsInRole("Owner"))
+{
+    <p>
+        @Html.ActionLink("Create New", "Add", null, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+    </p>
+}
+
+@using (Html.BeginForm())
+{
+
+    <div class="form-sort" style="display: flex; flex-direction: row; justify-content: space-around;">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <span class="">
+                @{
+                    SelectList orderBy = new SelectList(Enum.GetValues(typeof(RoomSortBy)));
+                }
+                @Html.DropDownList("OrderBy", orderBy as SelectList, htmlAttributes: new { @class = "room-form-dropdown" })
+                @Html.ValidationMessage("OrderBy", "", new { @class = "text-danger" })
+            </span>
+            <span class="" style="font-size:large;">
+                Is inverse?
+                @Html.CheckBox("Desc")
+                @Html.ValidationMessage("Desc", "", new { @class = "text-danger" })
+            </span>
+
+            <span class="">
+                <input type="submit" value="Sort" class="btn btn-default" style = "background-color: #AFE4F2"  />
+            </span>
+    </div>
+}
+
+
+@foreach (var item in Model)
+{
+
+    <div class="room-block">
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Owner"))
+        {
+            <div class="room-image">
+                @if (item.Image != null)
+                {
+                    @Html.Raw("<img src=\"data:image/jpeg;base64," + Convert.ToBase64String(item.Image) + "\" />")
+                }
+            </div>
+            <div class="room-table">
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.Id)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.Id)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.RoomSize)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.RoomSize)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.Comfort)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.Comfort)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.UserId)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.UserId)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.Status)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.Status)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.StartDate)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.StartDate)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.EndDate)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.EndDate)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">@Html.DisplayNameFor(model => model.Price)</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.Price)</div>
+                </div>
+            </div>
+        }
+        else if (item.Status == RoomStatus.Free)
+        {
+            <div class="room-image">
+                @if (item.Image != null)
+                {
+                    @Html.Raw("<img src=\"data:image/jpeg;base64," + Convert.ToBase64String(item.Image) + "\" />")
+                }
+            </div>
+            <div class="room-table">
+                <div class="room-row">
+                    <div class="room-cell">Number of room</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.Id)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">Number of places in the room</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.RoomSize)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">Comfort level</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.Comfort)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">Price per day</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => item.Price)</div>
+                </div>
+            </div>
+        }
+    </div>
+    if (User.IsInRole("Admin") || User.IsInRole("Owner"))
+    {
+        <div>
+            @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+        </div>
+    }
+    if (User.IsInRole("User") && item.Status == RoomStatus.Free)
+    {
+        <div>
+            @Html.ActionLink("Reserve", "Reserve", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+        </div>
+    }
+}

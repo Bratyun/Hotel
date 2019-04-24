@@ -1,0 +1,59 @@
+﻿@model IEnumerable<Hotel.Models.UserWithRoleViewModel>
+@using DAL.Account
+
+@{
+    ViewBag.Title = "List";
+}
+
+<h2>Users</h2>
+
+
+<table class="table table-bordered">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            Login
+        </th>
+        <th>
+            Role
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Email)
+        </th>
+        <th>
+            Phone number
+        </th>
+        <th></th>
+    </tr>
+    
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Id)
+
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.RoleName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Email)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PhoneNumber)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-default", @style = "background-color: #AFE4F2" }) 
+            @if (item.RoleName != "Owner")
+            {
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-default", @style = "background-color: #AFE4F2" })
+            }
+        </td>
+    </tr>
+}
+
+</table>

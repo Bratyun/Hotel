@@ -1,0 +1,97 @@
+﻿@model IEnumerable<Hotel.Models.CheckViewModel>
+@using DAL.EntityClasses
+
+@{
+    ViewBag.Title = "List";
+}
+
+<h2>List</h2>
+
+@foreach (var item in Model)
+{
+    
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title">
+                <span>
+                    Check id:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </strong>
+            </h2>
+        </div>
+        <div class="panel-body">
+            <div>
+                <span>
+                    Room id:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.RoomId)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    Price per day:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    Beginning of the visit:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    End of the visit:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    Registration date:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.RegisterDate)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    Total price:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.Total)
+                </strong>
+            </div>
+            <div>
+                <span>
+                    Status:
+                </span>
+                <strong>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </strong>
+            </div>
+            @if (User.IsInRole("User"))
+            {
+
+                <div>
+                    @if (item.Status == CheckStatus.New)
+                    {
+                        @Html.ActionLink("Pay", "Pay", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+                    }
+                    @if (DateTime.Now.Date < item.StartDate.Date || item.Status == CheckStatus.Paid || item.Status == CheckStatus.Failed)
+                    {
+                        @Html.ActionLink("Cancel reserve", "Delete", new { id = item.Id }, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}

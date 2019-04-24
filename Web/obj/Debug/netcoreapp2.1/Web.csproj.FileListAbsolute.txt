@@ -1,0 +1,6 @@
+C:\Users\Bratyun\Desktop\флешка\3 курс\2 семестр\ААПЗ\Hotel\Web\obj\Debug\netcoreapp2.1\Web.csprojAssemblyReference.cache
+C:\Users\Bratyun\Desktop\флешка\3 курс\2 семестр\ААПЗ\Hotel\Web\obj\Debug\netcoreapp2.1\Web.csproj.CoreCompileInputs.cache
+C:\Users\Bratyun\Desktop\флешка\3 курс\2 семестр\ААПЗ\Hotel\Web\obj\Debug\netcoreapp2.1\Web.RazorAssemblyInfo.cache
+C:\Users\Bratyun\Desktop\флешка\3 курс\2 семестр\ААПЗ\Hotel\Web\obj\Debug\netcoreapp2.1\Web.RazorAssemblyInfo.cs
+C:\Users\Bratyun\Desktop\флешка\3 курс\2 семестр\ААПЗ\Hotel\Web\obj\Debug\netcoreapp2.1\Web.AssemblyInfoInputs.cache
+C:\Users\Bratyun\Desktop\флешка\3 курс\2 семестр\ААПЗ\Hotel\Web\obj\Debug\netcoreapp2.1\Web.AssemblyInfo.cs

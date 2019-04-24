@@ -1,0 +1,39 @@
+﻿@model DAL.EntityClasses.Room
+@using DAL.EntityClasses
+
+
+@{
+    ViewBag.Title = "More";
+}
+
+<h2>Supply</h2>
+
+<div class="room-block">
+    <div class="room-image">
+        @if (Model.Image != null)
+        {
+            @Html.Raw("<img src=\"data:image/jpeg;base64," + Convert.ToBase64String(Model.Image) + "\" />")
+        }
+    </div>
+    <div class="room-table">
+        <div class="room-row">
+            <div class="room-cell">Number of room</div>
+            <div class="room-cell">@Html.DisplayFor(model => model.Id)</div>
+        </div>
+        <div class="room-row">
+            <div class="room-cell">Number of places in the room</div>
+            <div class="room-cell">@Html.DisplayFor(model => model.RoomSize)</div>
+        </div>
+        <div class="room-row">
+            <div class="room-cell">Comfort level</div>
+            <div class="room-cell">@Html.DisplayFor(model => model.Comfort)</div>
+        </div>
+        <div class="room-row">
+            <div class="room-cell">Price per day</div>
+            <div class="room-cell">@Html.DisplayFor(model => model.Price)</div>
+        </div>
+    </div>
+</div>
+<div>
+    @Html.ActionLink("Back", "List", null, new { @class = "btn btn-default", style = "background-color: #AFE4F2" })
+</div>

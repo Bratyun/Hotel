@@ -1,0 +1,84 @@
+﻿@model Hotel.Models.RoomReserveViewModel
+@using DAL.EntityClasses
+
+@{
+    ViewBag.Title = "Reserve";
+}
+
+<h2>Reserve</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+
+    <div class="form-horizontal">
+        <h4>Room</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.Image)
+        @Html.HiddenFor(model => model.RoomSize)
+        @Html.HiddenFor(model => model.Comfort)
+        @Html.HiddenFor(model => model.Price)
+
+        <div class="room-block">
+            <div class="room-image">
+                @if (Model.Image != null)
+                {
+                    @Html.Raw("<img src=\"data:image/jpeg;base64," + Convert.ToBase64String(Model.Image) + "\" />")
+                }
+                else
+                {
+                    <img src="~/Content/DoesNotLoad.png" style="width: 230px; height: 170px;" />
+                }
+            </div>
+            <div class="room-table">
+                <div class="room-row">
+                    <div class="room-cell">Number of room</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => Model.Id)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">Number of places in the room</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => Model.RoomSize)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">Comfort level</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => Model.Comfort)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">Price per day</div>
+                    <div class="room-cell">@Html.DisplayFor(modelItem => Model.Price)</div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">Beginning of the visit</div>
+                    <div class="room-cell">
+                        @Html.EditorFor(model => model.StartDate, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="room-row">
+                    <div class="room-cell">End of the visit</div>
+                    <div class="room-cell">
+                        @Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Reserve" class="btn btn-default" style = "background-color: #AFE4F2"  />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "List", null, new { @class = "btn btn-default", @style = "background-color: #AFE4F2" })
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

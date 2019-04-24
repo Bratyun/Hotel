@@ -1,0 +1,125 @@
+﻿@model DAL.EntityClasses.Request
+@using DAL.EntityClasses
+
+@{
+    ViewBag.Title = "Answer";
+}
+
+<h2>Supply</h2>
+<hr />
+
+<div style="display: flex; justify-content: center; align-items: flex-start;">
+    <div style="flex-grow:1; position: sticky; top: 60px; width: 30%;">
+        @if (Model == null)
+        {
+            <div class="alert alert-danger">
+                Model error!
+            </div>
+        }
+        else
+        {
+            <table class="table table-bordered">
+                <tr>
+                    <th>
+                        Size of room
+                    </th>
+                    <th>
+                        Level of comfort
+                    </th>
+                    <th>
+                        Beginning of the visit
+                    </th>
+                    <th>
+                        End of the visit
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        @Html.DisplayFor(model => model.RoomSize)
+                    </th>
+                    <th>
+                        @Html.DisplayFor(model => model.Comfort)
+                    </th>
+                    <th>
+                        @Html.DisplayFor(model => model.StartDate)
+                    </th>
+                    <th>
+                        @Html.DisplayFor(model => model.EndDate)
+                    </th>
+                </tr>
+            </table>
+        }
+    </div>
+    <div style="flex-grow:1;">
+        @if (ViewBag.Rooms != null)
+        {
+            List<Room> rooms = ViewBag.Rooms as List<Room>;
+            if (rooms.Count == 0)
+            {
+                <div class="alert alert-warning">
+                    Sorry, but we do not have free rooms!
+                </div>
+            }
+            else
+            {
+                foreach (var item in rooms)
+                {
+                    if (item.Status != RoomStatus.Free)
+                    {
+                        continue;
+                    }
+                    <div class="room-block">
+                        <div class="room-image">
+                            @if (item.Image != null)
+                            {
+                                @Html.Raw("<img src=\"data:image/jpeg;base64," + Convert.ToBase64String(item.Image) + "\" />")
+                            }
+                        </div>
+                        <div class="room-table">
+                            <div class="room-row">
+                                <div class="room-cell">@Html.DisplayNameFor(modelItem => item.Id)</div>
+                                <div class="room-cell">@Html.DisplayFor(modelItem => item.Id)</div>
+                            </div>
+                            <div class="room-row">
+                                <div class="room-cell">@Html.DisplayNameFor(modelItem => item.RoomSize)</div>
+                                <div class="room-cell">@Html.DisplayFor(modelItem => item.RoomSize)</div>
+                            </div>
+                            <div class="room-row">
+                                <div class="room-cell">@Html.DisplayNameFor(modelItem => item.Comfort)</div>
+                                <div class="room-cell">@Html.DisplayFor(modelItem => item.Comfort)</div>
+                            </div>
+                            <div class="room-row">
+                                <div class="room-cell">@Html.DisplayNameFor(modelItem => item.Status)</div>
+                                <div class="room-cell">@Html.DisplayFor(modelItem => item.Status)</div>
+                            </div>
+                            <div class="room-row">
+                                <div class="room-cell">@Html.DisplayNameFor(modelItem => item.Price)</div>
+                                <div class="room-cell">@Html.DisplayFor(modelItem => item.Price)</div>
+                            </div>
+                        </div>
+                        <div>
+                            @if (Model != null)
+                            {
+                                using (Html.BeginForm("Answer", "Request", FormMethod.Post))
+                                {
+                                    @Html.Hidden("roomId", item.Id)
+                                    @Html.Hidden("requestId", Model.Id)
+
+                                    <input type="submit" value="Commend" class="btn btn-default" style ="background-color: #AFE4F2" />
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+             }           
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                Sorry, but we do not have free rooms!
+            </div>
+        }
+    </div>
+</div>
+
+
